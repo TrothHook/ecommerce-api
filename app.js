@@ -1,6 +1,7 @@
 const express = require("express");
-const testRoute = require('./routes/testRoute')
+// const testRoute = require('./routes/testRoute')
 const authRoute = require('./routes/authRoute');
+const userRoute = require('./routes/userRoute');
 
 const app = express();
 
@@ -10,8 +11,12 @@ app.use(express.json());
 // parse form data
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/v1", testRoute);
+
+// ROUTES
+
+// app.use("/api/v1", testRoute);
 
 app.use('/api/v1/auth', authRoute);
+app.use('/api/v1/', userRoute)
 
 module.exports = app;
