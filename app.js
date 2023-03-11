@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const authRoute = require("./routes/authRoute");
 const userRoute = require("./routes/userRoute");
 const productRoute = require("./routes/productRoute");
+
 const globalErrorHandler = require("./controllers/errorController");
 const CreateError = require("./utils/createError");
 

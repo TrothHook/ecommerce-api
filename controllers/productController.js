@@ -21,8 +21,8 @@ exports.newProduct = async (req, res, next) => {
   }
 };
 
-// // PATCH @ api/v1/product/:id
-// // @desc only admin can update a product
+// PATCH @ api/v1/product/:id
+// @desc only admin can update a product
 
 exports.updateProduct = async (req, res, next) => {
   try {
@@ -49,8 +49,8 @@ exports.updateProduct = async (req, res, next) => {
   }
 };
 
-// // DELETE @ api/v1/product/:id
-// // @desc only admin can delete a product
+// DELETE @ api/v1/product/:id
+// @desc only admin can delete a product
 
 exports.deleteProduct = async (req, res, next) => {
   try {
@@ -72,67 +72,47 @@ exports.deleteProduct = async (req, res, next) => {
   }
 };
 
-// exports.getUsers = async (req, res, next) => {
-//   try {
-//     // console.log(req.user);
-//     if (!req.user.isAdmin)
-//       return next(
-//         new CreateError(
-//           "You have to be logged in as an Admin to access this route",
-//           403
-//         )
-//       );
+// // GET @ /api/v1/product/
+// // @desc fetch all the products
 
-//     // Filter the newest document
-//     const queryString = req.query.new;
+exports.getAllProducts = async (req, res, next) => {
+  try {
+    // Filter the newest document
+    const queryString = req.query.new;
 
-//     const data = queryString
-//       ? await Product.find({}).limit(1).sort({ _id: -1 })
-//       : await Product.find({});
+    const data = queryString
+      ? await Product.find({}).limit(1).sort({ _id: -1 })
+      : await Product.find({});
 
-//     res.status(200).json({
-//       status: "success",
-//       results: data.length,
-//       data,
-//     });
-//   } catch (error) {
-//     res.status(400).json({
-//       status: "fail",
-//       msg: error,
-//     });
-//   }
-// };
+    res.status(200).json({
+      status: "success",
+      results: data.length,
+      data,
+    });
+  } catch (error) {
+    next(error)
+  }
+};
 
-// // GET @ /api/v1/user/:id
-// // @desc only admin
+// GET @ /api/v1/product/:id
+// @desc fetch a particular product
 
-// exports.getUser = async (req, res, next) => {
-//   try {
-//     // console.log(req.user);
-//     if (!req.user.isAdmin)
-//       return next(
-//         new CreateError(
-//           "You have to be logged in as an Admin to access this route",
-//           403
-//         )
-//       );
+exports.getAProduct = async (req, res, next) => {
+  try {
 
-//     const data = await Product.findOne({ _id: req.params.id });
+    const data = await Product.findOne({ _id: req.params.id });
 
-//     if (!data)
-//       return next(new CreateError(`Product with this id doesn't exist`, 404));
+    if (!data)
+      return next(new CreateError(`Product with this id doesn't exist`, 404));
 
-//     res.status(200).json({
-//       status: "success",
-//       data,
-//     });
-//   } catch (error) {
-//     res.status(400).json({
-//       status: "fail",
-//       msg: error,
-//     });
-//   }
-// };
+    res.status(200).json({
+      status: "success",
+      data,
+    });
+  } catch (error) {
+    next(error)
+  }
+};
 
 // // GET @ api/v1/user/stats
 // // @desc get number of users registered in each month for past one year
