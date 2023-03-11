@@ -28,13 +28,13 @@ const userSchema = new mongoose.Schema(
     },
     refreshToken: {
       type: String,
+      select: false,
     },
   },
   { timestamps: true }
 );
 
 // hashing password with bcryptjs
-
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
@@ -44,7 +44,6 @@ userSchema.pre("save", async function (next) {
 });
 
 // comparing hashed password with the password entered in req.body
-
 userSchema.methods.correctPassword = async function (
   candidatePassword,
   userPassword
@@ -52,6 +51,7 @@ userSchema.methods.correctPassword = async function (
   return bcrypt.compare(candidatePassword, userPassword);
 };
 
+// generate refresh token and store in the database
 userSchema.methods.signRefreshToken = function () {
   this.refreshToken = jwt.sign(
     {

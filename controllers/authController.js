@@ -5,19 +5,53 @@ const CreateError = require("../utils/createError");
 const User = require("../models/userModel");
 
 function signAccessToken({ ...info }) {
-  return jwt.sign(info, process.env.JWT_ACCESS_SECRET, { expiresIn: "10m" });
+  return jwt.sign(info, process.env.JWT_ACCESS_SECRET, {
+    expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRY,
+  });
 }
+
+exports.generateAccessTokenFromRefreshToken = async (req, res, next) => {
+  try {
+    const refreshTokenDB = req.body.token;
+    const user = await User.find({ refreshToken: refreshTokenDB });
+
+    
+    if (!refreshTokenDB) return next(new CreateError("Not Allowed", 401));
+    
+    if (!user.refreshToken === refreshTokenDB)
+    return next(new CreateError("Token do not match", 403));
+    
+    jwt.verify(refreshTokenDB, process.env.JWT_REFRESH_SECRET, (err, user) => {
+      if (err) return next(new CreateError("use correct token", 403));
+      
+      // console.log(user)
+      const accessToken = signAccessToken({
+        id: user._id,
+        isAdmin: user.isAdmin,
+      });
+      res.status(200).json({
+        status: "success",
+        accessToken,
+      });
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // authenticate middleware
 exports.authenticateToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
   //   console.log(req.headers)
+  if (!authHeader) return next(new CreateError("You are not logged in", 401));
+
   const token = authHeader.split(" ")[1];
-  if (!token) return next(new CreateError("Not Allowed", 401));
+
+  if (!token) return next(new CreateError("No token found!", 401));
 
   jwt.verify(token, process.env.JWT_ACCESS_SECRET, (err, result) => {
-    if (err) return next(new CreateError("Forbidden", 403));
-    console.log(result);
+    if (err) return next(new CreateError("Token is invalid", 403));
+    // console.log(result);
     req.user = result;
     next();
   });
@@ -36,8 +70,6 @@ exports.signUp = async (req, res, next) => {
       id: newUser._id,
       isAdmin: newUser.isAdmin,
     });
-    newUser.signRefreshToken();
-    newUser.save();
 
     res.status(201).json({
       status: "success",
@@ -74,13 +106,15 @@ exports.login = async (req, res, next) => {
       isAdmin: user.isAdmin,
     });
 
-    const refreshToken = user.signRefreshToken();
+    user.signRefreshToken();
     user.save();
+
+    const refresh = user.refreshToken;
 
     res.status(200).json({
       status: "success",
       accessToken,
-      refreshToken,
+      refresh,
     });
   } catch (error) {
     res.status(400).json({
