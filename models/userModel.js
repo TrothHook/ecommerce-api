@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const userSchema = new mongoose.Schema(
   {
@@ -25,6 +26,9 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    refreshToken: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
@@ -46,6 +50,16 @@ userSchema.methods.correctPassword = async function (
   userPassword
 ) {
   return bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.signRefreshToken = function () {
+  this.refreshToken = jwt.sign(
+    {
+      id: this._id,
+      isAdmin: this.isAdmin,
+    },
+    process.env.JWT_REFRESH_SECRET
+  );
 };
 
 module.exports = mongoose.model("User", userSchema);
