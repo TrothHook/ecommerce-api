@@ -50,15 +50,6 @@ exports.generateAccessTokenFromRefreshToken = async (req, res, next) => {
     jwt.verify(refreshTokenDB, process.env.JWT_REFRESH_SECRET, (err, user) => {
       if (err) return next(new CreateError("use correct token", 403));
 
-      // console.log(user)
-      // const accessToken = signAccessToken({
-      //   id: user._id,
-      //   isAdmin: user.isAdmin,
-      // });
-      // res.status(200).json({
-      //   status: "success",
-      //   accessToken,
-      // });
       createSendToken(user, 201, res);
     });
   } catch (error) {
@@ -84,16 +75,6 @@ exports.authenticateToken = (req, res, next) => {
   });
 };
 
-// exports.authenticateAndAuthorizeToken = (req, res, next) => {
-//   this.authenticateToken(req, res, () => {
-//     if (req.user.id === req.params.id || req.user.isAdmin) {
-//       next();
-//     } else {
-//       return next(new CreateError("You are not allowed to do that!", 403));
-//     }
-//   });
-// };
-
 exports.signUp = async (req, res, next) => {
   try {
     const newUser = await User.create({
@@ -103,16 +84,6 @@ exports.signUp = async (req, res, next) => {
       isAdmin: req.body.isAdmin,
     });
 
-    // const accessToken = signAccessToken({
-    //   id: newUser._id,
-    //   isAdmin: newUser.isAdmin,
-    // });
-
-    // res.status(201).json({
-    //   status: "success",
-    //   msg: "new user added",
-    //   token: accessToken,
-    // });
     createSendToken(newUser, 201, res);
   } catch (error) {
     next(error);
@@ -138,24 +109,11 @@ exports.login = async (req, res, next) => {
       return next(new CreateError("Incorrect Email or password", 401));
     }
 
-    // var { password, ...others } = user._doc;
-
-    // const accessToken = signAccessToken({
-    //   id: user._id,
-    //   isAdmin: user.isAdmin,
-    // });
-
     user.signRefreshToken();
     user.save();
 
     createSendToken(user, 201, res);
-    // const refresh = user.refreshToken;
-
-    // res.status(200).json({
-    //   status: "success",
-    //   accessToken,
-    //   refresh,
-    // });
+  
   } catch (error) {
     next(error);
   }

@@ -78,19 +78,28 @@ exports.deleteProduct = async (req, res, next) => {
 exports.getAllProducts = async (req, res, next) => {
   try {
     // Filter the newest document
-    const queryString = req.query.new;
+    const queryNew = req.query.new;
+    const queryCategory = req.query.category;
 
-    const data = queryString
-      ? await Product.find({}).limit(1).sort({ _id: -1 })
-      : await Product.find({});
+    let products;
+
+    if (queryNew) {
+      products = await Product.find({}).sort({ createdAt: -1 }).limit(2);
+    } else if (queryCategory) {
+      products = await Product.find({
+        categories: { $in: [queryCategory] },
+      });
+    } else {
+      products = await Product.find({});
+    }
 
     res.status(200).json({
       status: "success",
-      results: data.length,
-      data,
+      results: products.length,
+      products,
     });
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
 
@@ -99,7 +108,6 @@ exports.getAllProducts = async (req, res, next) => {
 
 exports.getAProduct = async (req, res, next) => {
   try {
-
     const data = await Product.findOne({ _id: req.params.id });
 
     if (!data)
@@ -110,47 +118,6 @@ exports.getAProduct = async (req, res, next) => {
       data,
     });
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
-
-// // GET @ api/v1/user/stats
-// // @desc get number of users registered in each month for past one year
-
-// exports.getUserStats = async (req, res, next) => {
-//   const currentDate = new Date();
-//   const lastYear = new Date(
-//     currentDate.setFullYear(currentDate.getFullYear() - 1)
-//   );
-//   try {
-//     if (!req.user.isAdmin)
-//       return next(
-//         new CreateError(
-//           "you have to login as an admin to access this route",
-//           403
-//         )
-//       );
-
-//     const data = await Product.aggregate([
-//       {
-//         $match: { createdAt: { $gte: lastYear } },
-//       },
-//       {
-//         $project: { month: { $month: "$createdAt" } },
-//       },
-//       {
-//         $group: {
-//           _id: "$month",
-//           total: { $sum: 1 },
-//         },
-//       },
-//     ]);
-
-//     res.status(200).json({
-//       status: "success",
-//       data,
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
