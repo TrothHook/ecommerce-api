@@ -4,7 +4,11 @@ const authController = require("../controllers/authController");
 
 const router = express.Router();
 
-router.route("/getuser").get(authController.authenticateToken, userController.getUsers);
-
+router
+  .route("/")
+  .get(authController.authenticateToken, userController.getUsers);
+router
+  .route("/:id")
+  .patch(authController.authenticateToken, userController.userAccount);
 
 module.exports = router;

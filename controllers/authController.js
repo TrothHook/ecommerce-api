@@ -15,15 +15,14 @@ exports.generateAccessTokenFromRefreshToken = async (req, res, next) => {
     const refreshTokenDB = req.body.token;
     const user = await User.find({ refreshToken: refreshTokenDB });
 
-    
     if (!refreshTokenDB) return next(new CreateError("Not Allowed", 401));
-    
+
     if (!user.refreshToken === refreshTokenDB)
-    return next(new CreateError("Token do not match", 403));
-    
+      return next(new CreateError("Token do not match", 403));
+
     jwt.verify(refreshTokenDB, process.env.JWT_REFRESH_SECRET, (err, user) => {
       if (err) return next(new CreateError("use correct token", 403));
-      
+
       // console.log(user)
       const accessToken = signAccessToken({
         id: user._id,
@@ -56,6 +55,16 @@ exports.authenticateToken = (req, res, next) => {
     next();
   });
 };
+
+// exports.authenticateAndAuthorizeToken = (req, res, next) => {
+//   this.authenticateToken(req, res, () => {
+//     if (req.user.id === req.params.id || req.user.isAdmin) {
+//       next();
+//     } else {
+//       return next(new CreateError("You are not allowed to do that!", 403));
+//     }
+//   });
+// };
 
 exports.signUp = async (req, res, next) => {
   try {

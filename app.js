@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 // app.use("/api/v1", testRoute);
 
 app.use("/api/v1/auth", authRoute);
-app.use("/api/v1/", userRoute);
+app.use("/api/v1/user", userRoute);
 
 // Handling error for routes that don't exist
 app.all("*", (req, res, next) => {
