@@ -10,12 +10,39 @@ function signAccessToken({ ...info }) {
   });
 }
 
+const createSendToken = (user, statusCode, res) => {
+  const accessToken = signAccessToken({
+    id: user._id,
+    isAdmin: user.isAdmin,
+  });
+
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+
+  if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
+
+  res.cookie("jwt", accessToken, cookieOptions);
+
+  user.password = undefined;
+
+  res.status(statusCode).json({
+    status: "success",
+    accessToken,
+    data: user,
+  });
+};
+
 exports.generateAccessTokenFromRefreshToken = async (req, res, next) => {
   try {
     const refreshTokenDB = req.body.token;
     const user = await User.find({ refreshToken: refreshTokenDB });
 
-    if (!refreshTokenDB) return next(new CreateError("Not Allowed", 401));
+    if (!refreshTokenDB)
+      return next(new CreateError("Please register or Login", 401));
 
     if (!user.refreshToken === refreshTokenDB)
       return next(new CreateError("Token do not match", 403));
@@ -24,14 +51,15 @@ exports.generateAccessTokenFromRefreshToken = async (req, res, next) => {
       if (err) return next(new CreateError("use correct token", 403));
 
       // console.log(user)
-      const accessToken = signAccessToken({
-        id: user._id,
-        isAdmin: user.isAdmin,
-      });
-      res.status(200).json({
-        status: "success",
-        accessToken,
-      });
+      // const accessToken = signAccessToken({
+      //   id: user._id,
+      //   isAdmin: user.isAdmin,
+      // });
+      // res.status(200).json({
+      //   status: "success",
+      //   accessToken,
+      // });
+      createSendToken(user, 201, res);
     });
   } catch (error) {
     next(error);
@@ -75,21 +103,19 @@ exports.signUp = async (req, res, next) => {
       isAdmin: req.body.isAdmin,
     });
 
-    const accessToken = signAccessToken({
-      id: newUser._id,
-      isAdmin: newUser.isAdmin,
-    });
+    // const accessToken = signAccessToken({
+    //   id: newUser._id,
+    //   isAdmin: newUser.isAdmin,
+    // });
 
-    res.status(201).json({
-      status: "success",
-      msg: "new user added",
-      token: accessToken,
-    });
+    // res.status(201).json({
+    //   status: "success",
+    //   msg: "new user added",
+    //   token: accessToken,
+    // });
+    createSendToken(newUser, 201, res);
   } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      msg: error.message,
-    });
+    next(error);
   }
 };
 
@@ -101,7 +127,11 @@ exports.login = async (req, res, next) => {
       return next(new CreateError("Provide username and password", 400));
     }
 
-    const user = await User.findOne({ username }).select("+password");
+    const user = await User.findOne({ username })
+      .select("+password")
+      .select("-createdAt")
+      .select("-updatedAt")
+      .select("-__v");
 
     if (!user || !(await user.correctPassword(password, user.password))) {
       //   console.log(user);
@@ -110,25 +140,23 @@ exports.login = async (req, res, next) => {
 
     // var { password, ...others } = user._doc;
 
-    const accessToken = signAccessToken({
-      id: user._id,
-      isAdmin: user.isAdmin,
-    });
+    // const accessToken = signAccessToken({
+    //   id: user._id,
+    //   isAdmin: user.isAdmin,
+    // });
 
     user.signRefreshToken();
     user.save();
 
-    const refresh = user.refreshToken;
+    createSendToken(user, 201, res);
+    // const refresh = user.refreshToken;
 
-    res.status(200).json({
-      status: "success",
-      accessToken,
-      refresh,
-    });
+    // res.status(200).json({
+    //   status: "success",
+    //   accessToken,
+    //   refresh,
+    // });
   } catch (error) {
-    res.status(400).json({
-      status: "fail",
-      msg: error.message,
-    });
+    next(error);
   }
 };
