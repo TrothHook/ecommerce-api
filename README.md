@@ -1,1 +1,1 @@
-# ecommerce-api
+# shop-api
