@@ -8,34 +8,34 @@ const userSchema = new mongoose.Schema(
     username: {
       type: String,
       required: [true, "Username is required"],
-      unique: true,
+      unique: true
     },
     email: {
       type: String,
       required: [true, "email id is required"],
       unique: true,
-      validate: [validator.isEmail, "Email is invalid"],
+      validate: [validator.isEmail, "Email is invalid"]
     },
     password: {
       type: String,
       required: [true, "password is required"],
       minlength: 8,
-      select: false,
+      select: false
     },
     isAdmin: {
       type: Boolean,
-      default: false,
+      default: false
     },
     refreshToken: {
       type: String,
-      select: false,
-    },
+      select: false
+    }
   },
   { timestamps: true }
 );
 
 // hashing password with bcryptjs
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function(next) {
   if (!this.isModified("password")) return next();
 
   this.password = await bcrypt.hash(this.password, 12);
@@ -44,7 +44,7 @@ userSchema.pre("save", async function (next) {
 });
 
 // comparing hashed password with the password entered in req.body
-userSchema.methods.correctPassword = async function (
+userSchema.methods.correctPassword = async function(
   candidatePassword,
   userPassword
 ) {
@@ -52,11 +52,11 @@ userSchema.methods.correctPassword = async function (
 };
 
 // generate refresh token and store in the database
-userSchema.methods.signRefreshToken = function () {
+userSchema.methods.signRefreshToken = function() {
   this.refreshToken = jwt.sign(
     {
       id: this._id,
-      isAdmin: this.isAdmin,
+      isAdmin: this.isAdmin
     },
     process.env.JWT_REFRESH_SECRET
   );

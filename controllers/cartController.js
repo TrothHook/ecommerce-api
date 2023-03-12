@@ -1,36 +1,36 @@
-const Product = require("../models/productModel");
+const Cart = require("../models/cartModel");
 const CreateError = require("../utils/createError");
 
-// POST @ /api/v1/product
-// @desc only admin can add new product in database
+// POST @ /api/v1/cart
+// @desc only registered user can add new cart in database
 
 exports.newProduct = async (req, res, next) => {
   try {
-    if (!req.user.isAdmin)
+    if (!req.user.id)
       return next(
         new CreateError("You have to be admin in order to add products", 403)
       );
 
-    const newProduct = await Product.create(req.body);
+    const newProduct = await Cart.create(req.body);
     res.status(201).json({
       status: "success",
-      data: newProduct,
+      data: newProduct
     });
   } catch (error) {
     next(error);
   }
 };
 
-// // PATCH @ api/v1/product/:id
-// // @desc only admin can update a product
+// // PATCH @ api/v1/cart/:id
+// // @desc only admin can update a cart
 
 // exports.updateProduct = async (req, res, next) => {
 //   try {
 //     if (req.user.isAdmin) {
-//       if (!(await Product.findOne({ _id: req.params.id })))
-//         return next(new CreateError("No product found with this ID", 404));
+//       if (!(await Cart.findOne({ _id: req.params.id })))
+//         return next(new CreateError("No cart found with this ID", 404));
 
-//       const updatedProduct = await Product.findByIdAndUpdate(
+//       const updatedProduct = await Cart.findByIdAndUpdate(
 //         req.params.id,
 //         {
 //           $set: req.body,
@@ -49,22 +49,22 @@ exports.newProduct = async (req, res, next) => {
 //   }
 // };
 
-// // DELETE @ api/v1/product/:id
-// // @desc only admin can delete a product
+// // DELETE @ api/v1/cart/:id
+// // @desc only admin can delete a cart
 
 // exports.deleteProduct = async (req, res, next) => {
 //   try {
 //     if (req.user.isAdmin) {
-//       const deletedProduct = await Product.deleteOne({ _id: req.params.id });
+//       const deletedProduct = await Cart.deleteOne({ _id: req.params.id });
 
 //       //   console.log(deletedProduct.deletedCount);
 
 //       if (deletedProduct.deletedCount === 0)
-//         return next(new CreateError("Product with this id doesn't exist", 404));
+//         return next(new CreateError("Cart with this id doesn't exist", 404));
 
 //       res.status(200).json({
 //         status: "success",
-//         msg: "product deleted",
+//         msg: "cart deleted",
 //       });
 //     }
 //   } catch (error) {
@@ -72,7 +72,7 @@ exports.newProduct = async (req, res, next) => {
 //   }
 // };
 
-// // // GET @ /api/v1/product/
+// // // GET @ /api/v1/cart/
 // // // @desc fetch all the products
 
 // exports.getAllProducts = async (req, res, next) => {
@@ -84,13 +84,13 @@ exports.newProduct = async (req, res, next) => {
 //     let products;
 
 //     if (queryNew) {
-//       products = await Product.find({}).sort({ createdAt: -1 }).limit(2);
+//       products = await Cart.find({}).sort({ createdAt: -1 }).limit(2);
 //     } else if (queryCategory) {
-//       products = await Product.find({
+//       products = await Cart.find({
 //         categories: { $in: [queryCategory] },
 //       });
 //     } else {
-//       products = await Product.find({});
+//       products = await Cart.find({});
 //     }
 
 //     res.status(200).json({
@@ -103,15 +103,15 @@ exports.newProduct = async (req, res, next) => {
 //   }
 // };
 
-// // GET @ /api/v1/product/:id
-// // @desc fetch a particular product
+// // GET @ /api/v1/cart/:id
+// // @desc fetch a particular cart
 
 // exports.getAProduct = async (req, res, next) => {
 //   try {
-//     const data = await Product.findOne({ _id: req.params.id });
+//     const data = await Cart.findOne({ _id: req.params.id });
 
 //     if (!data)
-//       return next(new CreateError(`Product with this id doesn't exist`, 404));
+//       return next(new CreateError(`Cart with this id doesn't exist`, 404));
 
 //     res.status(200).json({
 //       status: "success",
