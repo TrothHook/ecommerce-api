@@ -26,7 +26,7 @@ const createSendToken = async (user, statusCode, res) => {
 
   res.cookie("jwt", accessToken, cookieOptions);
 
-  console.log(user);
+  // console.log(user);
 
   const covertUser = await User.findById(user._id)
     .select("+refreshToken")
@@ -56,9 +56,9 @@ exports.generateAccessTokenFromRefreshToken = async (req, res, next) => {
 
     if (!user) return next(new CreateError("Login to continue", 404));
 
-    console.log(user);
-    console.log(user.refreshToken);
-    console.log(refreshTokenDB);
+    // console.log(user);
+    // console.log(user.refreshToken);
+    // console.log(refreshTokenDB);
 
     if (!refreshTokenDB)
       return next(new CreateError("Please register or Login", 401));
@@ -146,6 +146,9 @@ exports.login = async (req, res, next) => {
 
 exports.logout = async (req, res, next) => {
   try {
+    if (!(await User.findOne({ refreshToken: req.body.token })))
+      return next(new CreateError("Input a valid token", 403));
+
     jwt.verify(req.body.token, process.env.JWT_REFRESH_SECRET, (err, user) => {
       if (err) return next(new CreateError("refresh token is not valid", 401));
       req.user = user;

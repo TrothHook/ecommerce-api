@@ -6,6 +6,9 @@ const cookieParser = require("cookie-parser");
 const authRoute = require("./routes/authRoute");
 const userRoute = require("./routes/userRoute");
 const productRoute = require("./routes/productRoute");
+const cartRoute = require("./routes/cartRoute");
+const orderRoute = require("./routes/orderRoute");
+const paymentRoute = require("./routes/paymentRoute");
 
 const globalErrorHandler = require("./controllers/errorController");
 const CreateError = require("./utils/createError");
@@ -29,6 +32,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/product", productRoute);
+app.use("/api/v1/cart", cartRoute);
+app.use("/api/v1/order", orderRoute);
+app.use("/api/v1/checkout", paymentRoute);
 
 // Handling error for routes that don't exist
 app.all("*", (req, res, next) => {

@@ -21,18 +21,20 @@ exports.getUsers = async (req, res, next) => {
     const queryString = req.query.new;
 
     const data = queryString
-      ? await User.find({}).limit(1).sort({ _id: -1 })
+      ? await User.find({})
+          .limit(1)
+          .sort({ _id: -1 })
       : await User.find({});
 
     res.status(200).json({
       status: "success",
       results: data.length,
-      data,
+      data
     });
   } catch (error) {
     res.status(400).json({
       status: "fail",
-      msg: error,
+      msg: error
     });
   }
 };
@@ -58,12 +60,12 @@ exports.getUser = async (req, res, next) => {
 
     res.status(200).json({
       status: "success",
-      data,
+      data
     });
   } catch (error) {
     res.status(400).json({
       status: "fail",
-      msg: error,
+      msg: error
     });
   }
 };
@@ -80,13 +82,13 @@ exports.userAccount = async (req, res, next) => {
       const updatedUser = await User.findByIdAndUpdate(
         req.params.id,
         {
-          $set: req.body,
+          $set: req.body
         },
         { new: true }
       );
       res.status(200).json({
         status: "success",
-        updatedUser,
+        updatedUser
       });
     } else {
       return next(new CreateError("You are not allowed to do that!", 403));
@@ -111,7 +113,7 @@ exports.deleteUser = async (req, res, next) => {
 
       res.status(200).json({
         status: "success",
-        msg: "user deleted",
+        msg: "user deleted"
       });
     }
   } catch (error) {}
@@ -136,22 +138,22 @@ exports.getUserStats = async (req, res, next) => {
 
     const data = await User.aggregate([
       {
-        $match: { createdAt: { $gte: lastYear } },
+        $match: { createdAt: { $gte: lastYear } }
       },
       {
-        $project: { month: { $month: "$createdAt" } },
+        $project: { month: { $month: "$createdAt" } }
       },
       {
         $group: {
           _id: "$month",
-          total: { $sum: 1 },
-        },
-      },
+          total: { $sum: 1 }
+        }
+      }
     ]);
 
     res.status(200).json({
       status: "success",
-      data,
+      data
     });
   } catch (error) {
     next(error);

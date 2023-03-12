@@ -14,7 +14,7 @@ exports.newProduct = async (req, res, next) => {
     const newProduct = await Product.create(req.body);
     res.status(201).json({
       status: "success",
-      data: newProduct,
+      data: newProduct
     });
   } catch (error) {
     next(error);
@@ -33,13 +33,13 @@ exports.updateProduct = async (req, res, next) => {
       const updatedProduct = await Product.findByIdAndUpdate(
         req.params.id,
         {
-          $set: req.body,
+          $set: req.body
         },
         { new: true }
       );
       res.status(200).json({
         status: "success",
-        updatedProduct,
+        updatedProduct
       });
     } else {
       return next(new CreateError("You are not allowed to do that!", 403));
@@ -64,7 +64,7 @@ exports.deleteProduct = async (req, res, next) => {
 
       res.status(200).json({
         status: "success",
-        msg: "product deleted",
+        msg: "product deleted"
       });
     }
   } catch (error) {
@@ -84,10 +84,12 @@ exports.getAllProducts = async (req, res, next) => {
     let products;
 
     if (queryNew) {
-      products = await Product.find({}).sort({ createdAt: -1 }).limit(2);
+      products = await Product.find({})
+        .sort({ createdAt: -1 })
+        .limit(2);
     } else if (queryCategory) {
       products = await Product.find({
-        categories: { $in: [queryCategory] },
+        categories: { $in: [queryCategory] }
       });
     } else {
       products = await Product.find({});
@@ -96,7 +98,7 @@ exports.getAllProducts = async (req, res, next) => {
     res.status(200).json({
       status: "success",
       results: products.length,
-      products,
+      products
     });
   } catch (error) {
     next(error);
@@ -115,7 +117,7 @@ exports.getAProduct = async (req, res, next) => {
 
     res.status(200).json({
       status: "success",
-      data,
+      data
     });
   } catch (error) {
     next(error);

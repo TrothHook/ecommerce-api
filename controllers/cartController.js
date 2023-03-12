@@ -4,120 +4,114 @@ const CreateError = require("../utils/createError");
 // POST @ /api/v1/cart
 // @desc only registered user can add new cart in database
 
-exports.newProduct = async (req, res, next) => {
+exports.addProductsToCart = async (req, res, next) => {
   try {
-    if (!req.user.id)
-      return next(
-        new CreateError("You have to be admin in order to add products", 403)
-      );
-
-    const newProduct = await Cart.create(req.body);
+    const newCart = await Cart.create(req.body);
     res.status(201).json({
       status: "success",
-      data: newProduct
+      data: newCart
     });
   } catch (error) {
     next(error);
   }
 };
 
-// // PATCH @ api/v1/cart/:id
-// // @desc only admin can update a cart
+// PATCH @ api/v1/cart/:id
+// @desc only admin can update a cart
 
-// exports.updateProduct = async (req, res, next) => {
-//   try {
-//     if (req.user.isAdmin) {
-//       if (!(await Cart.findOne({ _id: req.params.id })))
-//         return next(new CreateError("No cart found with this ID", 404));
+exports.updateCart = async (req, res, next) => {
+  try {
+    if (req.user.id === req.params.id || req.user.isAdmin) {
+      if (!(await Cart.findOne({ _id: req.params.id })))
+        return next(new CreateError("No cart found with this ID", 404));
 
-//       const updatedProduct = await Cart.findByIdAndUpdate(
-//         req.params.id,
-//         {
-//           $set: req.body,
-//         },
-//         { new: true }
-//       );
-//       res.status(200).json({
-//         status: "success",
-//         updatedProduct,
-//       });
-//     } else {
-//       return next(new CreateError("You are not allowed to do that!", 403));
-//     }
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+      const updatedCart = await Cart.findByIdAndUpdate(
+        req.params.id,
+        {
+          $set: req.body
+        },
+        { new: true }
+      );
+      res.status(200).json({
+        status: "success",
+        updatedCart
+      });
+    } else {
+      return next(new CreateError("You are not allowed to do that!", 403));
+    }
+  } catch (error) {
+    next(error);
+  }
+};
 
-// // DELETE @ api/v1/cart/:id
-// // @desc only admin can delete a cart
+// DELETE @ api/v1/cart/:id
+// @desc only admin as well as registered user can delete a cart
 
-// exports.deleteProduct = async (req, res, next) => {
-//   try {
-//     if (req.user.isAdmin) {
-//       const deletedProduct = await Cart.deleteOne({ _id: req.params.id });
+exports.deleteCart = async (req, res, next) => {
+  try {
+    if (req.user.id === req.params.id || req.user.isAdmin) {
+      const deletedCart = await Cart.deleteOne({ _id: req.params.id });
 
-//       //   console.log(deletedProduct.deletedCount);
+      //   console.log(deletedCart.deletedCount);
 
-//       if (deletedProduct.deletedCount === 0)
-//         return next(new CreateError("Cart with this id doesn't exist", 404));
+      if (deletedCart.deletedCount === 0)
+        return next(new CreateError("Cart with this id doesn't exist", 404));
 
-//       res.status(200).json({
-//         status: "success",
-//         msg: "cart deleted",
-//       });
-//     }
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+      res.status(200).json({
+        status: "success",
+        msg: "cart deleted"
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
 
-// // // GET @ /api/v1/cart/
-// // // @desc fetch all the products
+// GET @ /api/v1/cart/:userId
+// @desc fetch a particular cart
 
-// exports.getAllProducts = async (req, res, next) => {
-//   try {
-//     // Filter the newest document
-//     const queryNew = req.query.new;
-//     const queryCategory = req.query.category;
+exports.getACart = async (req, res, next) => {
+  try {
+    if (req.user.id === req.params.id || req.user.isAdmin) {
+      const data = await Cart.findOne({ _id: req.params.userId });
 
-//     let products;
+      if (!data)
+        return next(new CreateError(`Cart with this id doesn't exist`, 404));
 
-//     if (queryNew) {
-//       products = await Cart.find({}).sort({ createdAt: -1 }).limit(2);
-//     } else if (queryCategory) {
-//       products = await Cart.find({
-//         categories: { $in: [queryCategory] },
-//       });
-//     } else {
-//       products = await Cart.find({});
-//     }
+      res.status(200).json({
+        status: "success",
+        data
+      });
+    } else {
+      return next(new CreateError("You are not allowed to do that!", 403));
+    }
+  } catch (error) {
+    next(error);
+  }
+};
 
-//     res.status(200).json({
-//       status: "success",
-//       results: products.length,
-//       products,
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+// GET @ /api/v1/cart/
+// @desc fetch all the carts of all users
 
-// // GET @ /api/v1/cart/:id
-// // @desc fetch a particular cart
+exports.getAllCarts = async (req, res, next) => {
+  try {
+    if (req.user.isAdmin) {
+      const carts = await Cart.find({});
 
-// exports.getAProduct = async (req, res, next) => {
-//   try {
-//     const data = await Cart.findOne({ _id: req.params.id });
-
-//     if (!data)
-//       return next(new CreateError(`Cart with this id doesn't exist`, 404));
-
-//     res.status(200).json({
-//       status: "success",
-//       data,
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+      res.status(200).json({
+        status: "success",
+        results: carts.length,
+        carts
+      });
+    } else {
+      return next(
+        new CreateError(
+          "you have to be admin inorder to access all the carts",
+          403
+        )
+      );
+    }
+  } catch (error) {
+    next(error);
+  }
+};

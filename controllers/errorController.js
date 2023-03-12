@@ -36,7 +36,7 @@ function handleDuplicateErrorDB(error) {
 // Handling validation errors
 
 function handleValidationError(error) {
-  const errors = Object.values(error.errors).map((el) => el.message);
+  const errors = Object.values(error.errors).map(el => el.message);
 
   const message = `Invalid input data. ${errors.join(". ")}`;
   return new CreateError(message, 400);
@@ -50,14 +50,14 @@ function sendErrorDev(error, req, res) {
       status: error.status,
       error: error,
       message: error.message,
-      stack: error.stack,
+      stack: error.stack
     });
   }
 
   console.log("ERROR!", error);
   return res.status(error.status).render("error", {
     title: "Something went wrong!",
-    msg: error.message,
+    msg: error.message
   });
 }
 
@@ -70,7 +70,7 @@ function sendErrorProduction(err, req, res) {
     if (err.isOperational) {
       return res.status(err.statusCode).json({
         status: err.status,
-        message: err.message,
+        message: err.message
       });
     }
     // B) Programming or other unknown error: don't leak error details
@@ -79,7 +79,7 @@ function sendErrorProduction(err, req, res) {
     // 2) Send generic message
     return res.status(500).json({
       status: "error",
-      message: "Something went very wrong!",
+      message: "Something went very wrong!"
     });
   }
 
@@ -88,7 +88,7 @@ function sendErrorProduction(err, req, res) {
   if (err.isOperational) {
     return res.status(err.statusCode).render("error", {
       title: "Something went wrong!",
-      msg: err.message,
+      msg: err.message
     });
   }
   // B) Programming or other unknown error: don't leak error details
@@ -97,6 +97,6 @@ function sendErrorProduction(err, req, res) {
   // 2) Send generic message
   return res.status(err.statusCode).render("error", {
     title: "Something went wrong!",
-    msg: "Please try again later.",
+    msg: "Please try again later."
   });
 }
